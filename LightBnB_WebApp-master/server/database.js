@@ -86,7 +86,8 @@ const getAllReservations = function(guest_id, limit = 10) {
   return pool
     .query(`SELECT * FROM reservations 
             JOIN users ON users.id = reservations.guest_id
-            WHERE guest_id = '${guest_id}'`)
+            WHERE guest_id = '${guest_id}'
+            LIMIT ${limit};`)
     .then((result) => {
       if(!result.rows){
         return null;
