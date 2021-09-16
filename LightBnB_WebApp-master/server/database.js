@@ -35,9 +35,8 @@ const getUserWithEmail = function(email) {
   return pool
     .query(`SELECT * FROM users WHERE email LIKE $1;`, [`%${email}%`]) // USE LIKE because emails are case insensitive
     .then((result) => {
-      console.log('result.row >>> ', result.rows);
-      console.log('result.row[0] >>> ', result.rows[0]);
-      if (!result.rows){
+      console.log('result.rows >>> ', result.rows)
+      if (!result.rows) {
         return null
       }
       return result.rows[0];
@@ -58,14 +57,14 @@ exports.getUserWithEmail = getUserWithEmail;
   return pool
     .query(`SELECT * FROM users WHERE id = $1;`, [`${id}`])
     .then((result) => {
-      if(!result.rows){
+      if(!result.rows) {
         return null;
       }
       return result.rows[0];
     })
     .catch((error) => {
       return error.message;
-    })
+    });
 }
 exports.getUserWithId = getUserWithId;
 
@@ -76,10 +75,19 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser =  function(user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+  const values = [user.name, user.email, 'password'];
+
+  return pool
+    .query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`, values)
+    .then((result) => {
+      if (!result.rows) {
+        return null;
+      }
+      return result.rows[0];
+    })
+    .catch((error) => {
+      return error.message;
+    });
 }
 exports.addUser = addUser;
 
