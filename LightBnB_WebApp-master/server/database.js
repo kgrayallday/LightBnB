@@ -8,6 +8,7 @@ const pool = new Pool({
   host: 'localhost',
   database: 'lightbnb'
 });
+
 /// Users
 
 /**
@@ -82,7 +83,19 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+  return pool
+    .query(`SELECT * FROM reservations 
+            JOIN users ON users.id = reservations.guest_id
+            WHERE guest_id = '${guest_id}'`)
+    .then((result) => {
+      if(!result.rows){
+        return null;
+      }
+      return result.rows;
+    })
+    .catch((error) => {
+      return error.message;
+    });
 }
 exports.getAllReservations = getAllReservations;
 
