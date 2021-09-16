@@ -16,33 +16,16 @@ const pool = new Pool({
  * @return {Promise<{}>} A promise to the user.
  */
 
-// - - - OLD CODE BEFORE CONVERSION FOR REFERENCE - - - 
-//
-// const getUserWithEmail = function(email) {
-//   let user;
-//   for (const userId in users) {
-//     user = users[userId];
-//     if (user.email.toLowerCase() === email.toLowerCase()) {
-//       break;
-//     } else {
-//       user = null;
-//     }
-//   }
-//   return Promise.resolve(user);
-// }
-
 const getUserWithEmail = function(email) {
   return pool
     .query(`SELECT * FROM users WHERE email LIKE $1;`, [`%${email}%`]) // USE LIKE because emails are case insensitive
     .then((result) => {
-      console.log('result.rows >>> ', result.rows)
       if (!result.rows) {
         return null
       }
       return result.rows[0];
     })
     .catch((err) => {
-      console.log(err.message);
       return err.message;
     });
 }
