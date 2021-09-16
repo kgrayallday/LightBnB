@@ -1,8 +1,7 @@
 INSERT INTO users (name, email, password)
-VALUES ('Peter Parker', web@developer.net, '$2a$10$FB/BOAVhpuLvpOREQVmvmezD4ED/.JBIDRh70tGevYzYzQgFId2u.'),
-('Clark Kent', superfly@krypton.com, '$2a$10$FB/BOAVhpuLvpOREQVmvmezD4ED/.JBIDRh70tGevYzYzQgFId2u.'),
-('Bruce Wayne', sosad@mancake.com, '$2a$10$FB/BOAVhpuLvpOREQVmvmezD4ED/.JBIDRh70tGevYzYzQgFId2u.');
-
+VALUES ('Peter Parker', 'web@developer.net', '$2a$10$FB/BOAVhpuLvpOREQVmvmezD4ED/.JBIDRh70tGevYzYzQgFId2u.'),
+('Clark Kent', 'superfly@krypton.com', '$2a$10$FB/BOAVhpuLvpOREQVmvmezD4ED/.JBIDRh70tGevYzYzQgFId2u.'),
+('Bruce Wayne', 'sosad@mancake.com', '$2a$10$FB/BOAVhpuLvpOREQVmvmezD4ED/.JBIDRh70tGevYzYzQgFId2u.');
 
 INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, parking_spaces, number_of_bathrooms, number_of_bedrooms, country, street, city, province, post_code, active)
 VALUES (1, 'Aunt Mays', 'description', 'https://source.unsplash.com/350x350/?person', 'https://source.unsplash.com/1600x900/?house', 93061, 6, 4, 4, 'Canada', '150 E 16th Ave', 'Vancouver', 'British Columbia', 'V5T 2T2', 'true'),
