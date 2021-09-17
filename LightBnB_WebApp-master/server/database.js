@@ -1,5 +1,3 @@
-// const properties = require('./json/properties.json');
-// const users = require('./json/users.json');
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -19,17 +17,12 @@ const pool = new Pool({
 
 const getUserWithEmail = function(email) {
   return pool
-    .query(`SELECT * FROM users WHERE email LIKE $1;`, [`%${email}%`]) // USE LIKE because emails are case insensitive
+    .query(`SELECT * FROM users WHERE email ILIKE $1;`, [`%${email}%`]) // USE ILIKE because emails are case insensitive
     .then((result) => {
-      if (!result.rows) {
-        return null
-      }
       return result.rows[0];
     })
-    .catch((err) => {
-      return err.message;
-    });
-}
+    .catch((error) => error.message);
+};
 exports.getUserWithEmail = getUserWithEmail;
 
 /**
@@ -37,21 +30,13 @@ exports.getUserWithEmail = getUserWithEmail;
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
- const getUserWithId = function(id) {
+const getUserWithId = function(id) {
   return pool
     .query(`SELECT * FROM users WHERE id = $1;`, [`${id}`])
-    .then((result) => {
-      if(!result.rows) {
-        return null;
-      }
-      return result.rows[0];
-    })
-    .catch((error) => {
-      return error.message;
-    });
-}
+    .then((result) => result.rows[0])
+    .catch((error) => error.message);
+};
 exports.getUserWithId = getUserWithId;
-
 
 /**
  * Add a new user to the database.
@@ -63,16 +48,9 @@ const addUser =  function(user) {
 
   return pool
     .query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *;`, values)
-    .then((result) => {
-      if (!result.rows) {
-        return null;
-      }
-      return result.rows[0];
-    })
-    .catch((error) => {
-      return error.message;
-    });
-}
+    .then((result) => result.rows[0])
+    .catch((error) => error.message);
+};
 exports.addUser = addUser;
 
 /// Reservations
@@ -84,20 +62,19 @@ exports.addUser = addUser;
  */
 const getAllReservations = function(guest_id, limit = 10) {
   return pool
-    .query(`SELECT * FROM reservations 
-            JOIN users ON users.id = reservations.guest_id
-            WHERE guest_id = '${guest_id}'
-            LIMIT ${limit};`)
-    .then((result) => {
-      if(!result.rows){
-        return null;
-      }
-      return result.rows;
-    })
-    .catch((error) => {
-      return error.message;
-    });
-}
+    .query(`
+      SELECT properties.*, reservations.*, avg(rating) as average_rating
+      FROM reservations
+      JOIN properties ON reservations.property_id = properties.id
+      JOIN property_reviews ON property_reviews.property_id = properties.id
+      WHERE reservations.guest_id = $1
+      GROUP BY properties.id, reservations.id
+      ORDER BY start_date DESC
+      LIMIT $2;
+    `, [guest_id, limit])
+    .then((result) => result.rows)
+    .catch((error) => error.message);
+};
 exports.getAllReservations = getAllReservations;
 
 /// Properties
@@ -109,7 +86,7 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 
- const getAllProperties = (options, limit = 10) => {
+const getAllProperties = (options, limit = 10) => {
 
   const queryParams = [];
 
@@ -134,7 +111,7 @@ exports.getAllReservations = getAllReservations;
     if (queryParams.length >= 1) {
       queryString += `AND cost_per_night > $${queryParams.length} `;
     } else {
-    queryString += `WHERE cost_per_night > $${queryParams.length} `;
+      queryString += `WHERE cost_per_night > $${queryParams.length} `;
     }
   }
 
@@ -143,7 +120,7 @@ exports.getAllReservations = getAllReservations;
     if (queryParams.length >= 1) {
       queryString += `AND cost_per_night < $${queryParams.length} `;
     } else {
-    queryString += `WHERE cost_per_night < $${queryParams.length} `;
+      queryString += `WHERE cost_per_night < $${queryParams.length} `;
     }
   }
 
@@ -161,13 +138,9 @@ exports.getAllReservations = getAllReservations;
   `;
 
   return pool
-  .query(queryString, queryParams)
-  .then((result) => {
-    return result.rows;
-  })
-  .catch((error) => {
-    return error.message;
-  });
+    .query(queryString, queryParams)
+    .then((result) => result.rows)
+    .catch((error) => error.message);
 };
 exports.getAllProperties = getAllProperties;
 
@@ -216,11 +189,7 @@ const addProperty = function(property) {
 
   return pool
     .query(queryString, values)
-    .then((result) => {
-      return result.rows;
-    })
-    .catch((error) => {
-      return error.message;
-    });
+    .then((result) => result.rows)
+    .catch((error) => error.message);
 };
 exports.addProperty = addProperty;
